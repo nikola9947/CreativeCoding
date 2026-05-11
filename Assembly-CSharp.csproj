@@ -49,7 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\ForkliftPickup.cs" />
-    <Compile Include="Assets\Challenge 2\Scripts\PlayerControllerX.cs" />
     <Compile Include="Assets\Scripts\ControlPanel.cs" />
     <Compile Include="Assets\Scripts\ConveyerJamSensor.cs" />
     <Compile Include="Assets\Scripts\ConveyorBelt.cs" />
@@ -58,7 +57,6 @@
     <Compile Include="Assets\Scripts\ProcessingMachine.cs" />
     <Compile Include="Assets\TextureMaker\Scripts\TextureMaker.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
-    <Compile Include="Assets\Challenge 2\Scripts\MoveForwardX.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\EndWorkerStation.cs" />
     <Compile Include="Assets\Scripts\RobotArmTransfer.cs" />
