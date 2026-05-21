@@ -3,110 +3,97 @@ using UnityEngine;
 
 public class ForkliftPickup : MonoBehaviour
 {
-    [Header("Objects")]
     public Transform forklift;
     public Transform pallet;
 
-    [Header("Pickup Full Pallet")]
-    public Transform pickupPoint;
-
-    [Header("Remove Full Pallet")]
+    public Transform homePoint;
     public Transform exitPoint;
 
-    [Header("Get New Pallet")]
-    public Transform newPalletPoint;
-
-    [Header("Deliver New Pallet")]
-    public Transform forkliftDropPoint;
-    public Transform palletDropPoint;
-
-    [Header("Game Manager")]
     public GameManager gameManager;
 
-    [Header("Movement")]
-    public float moveSpeed = 2f;
+    public float moveSpeed = 5f;
     public float waitTime = 1f;
 
     private bool isMoving = false;
 
     public void PickupPallet(EndWorkerStation station)
     {
-        if (!isMoving)
-        {
-            StartCoroutine(PickupRoutine(station));
-        }
+        if (isMoving)
+            return;
+
+        StartCoroutine(PalletRoutine(station));
     }
 
-    private IEnumerator PickupRoutine(EndWorkerStation station)
+    private IEnumerator PalletRoutine(EndWorkerStation station)
     {
         isMoving = true;
 
-        // 1. Zur vollen Palette fahren
-        yield return MoveTo(pickupPoint.position);
+        Debug.Log("1 Palette aufnehmen");
+        pallet.SetParent(forklift, true);
 
         yield return new WaitForSeconds(waitTime);
 
-        // 2. Volle Palette aufnehmen
-        pallet.SetParent(forklift);
-
-        // 3. Volle Palette wegfahren
+        Debug.Log("2 Zum Exit fahren");
         yield return MoveTo(exitPoint.position);
 
         yield return new WaitForSeconds(waitTime);
 
-        // 4. Palette abgeben
-        pallet.SetParent(null);
-        pallet.gameObject.SetActive(false);
+        Debug.Log("3 Kartons entfernen");
+        ClearOnlyCartons();
 
-        // 5. Palette zählen
         if (gameManager != null)
-        {
             gameManager.PalletDelivered();
-        }
 
         yield return new WaitForSeconds(waitTime);
 
-        // 6. Neue leere Palette holen
-        pallet.gameObject.SetActive(true);
-
-        pallet.position = newPalletPoint.position;
-        pallet.rotation = newPalletPoint.rotation;
-
-        // 7. Leere Palette aufnehmen
-        pallet.SetParent(forklift);
+        Debug.Log("4 Zurück zum HomePoint fahren");
+        yield return MoveTo(homePoint.position);
 
         yield return new WaitForSeconds(waitTime);
 
-        // 8. Zur Produktionslinie fahren
-        yield return MoveTo(forkliftDropPoint.position);
+        Debug.Log("5 Palette absetzen");
+        pallet.SetParent(null, true);
 
-        yield return new WaitForSeconds(waitTime);
-
-        // 9. Neue Palette absetzen
-        pallet.SetParent(null);
-
-        pallet.position = palletDropPoint.position;
-        pallet.rotation = palletDropPoint.rotation;
-
-        yield return new WaitForSeconds(waitTime);
-
-        // 10. Produktion wieder starten
-        station.NewPalletArrived();
+        if (station != null)
+            station.NewPalletArrived();
 
         isMoving = false;
+
+        Debug.Log("6 Forklift fertig");
     }
 
-    private IEnumerator MoveTo(Vector3 target)
+    private void ClearOnlyCartons()
     {
-        while (Vector3.Distance(forklift.position, target) > 0.05f)
+        foreach (Transform slot in pallet)
+        {
+            for (int i = slot.childCount - 1; i >= 0; i--)
+            {
+                Destroy(slot.GetChild(i).gameObject);
+            }
+        }
+
+        Debug.Log("Only cartons removed. Slots kept.");
+    }
+
+    private IEnumerator MoveTo(Vector3 targetPosition)
+    {
+        if (forklift == null)
+        {
+            Debug.LogError("Forklift Transform fehlt!");
+            yield break;
+        }
+
+        while (Vector3.Distance(forklift.position, targetPosition) > 0.05f)
         {
             forklift.position = Vector3.MoveTowards(
                 forklift.position,
-                target,
+                targetPosition,
                 moveSpeed * Time.deltaTime
             );
 
             yield return null;
         }
+
+        forklift.position = targetPosition;
     }
 }

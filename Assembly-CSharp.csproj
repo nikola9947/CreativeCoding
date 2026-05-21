@@ -54,6 +54,7 @@
     <Compile Include="Assets\Scripts\ConveyorBelt.cs" />
     <Compile Include="Assets\Scripts\MachineDestroyer.cs" />
     <Compile Include="Assets\Scripts\WorkerSpawner.cs" />
+    <Compile Include="Assets\Scripts\WorkerMiniGame.cs" />
     <Compile Include="Assets\Scripts\ProcessingMachine.cs" />
     <Compile Include="Assets\TextureMaker\Scripts\TextureMaker.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
@@ -82,6 +83,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\Imported Stuff\3D Fan\docs.txt" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
