@@ -1,33 +1,77 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     [Header("Goal")]
     public int targetPallets = 10;
-
-    [Header("Timer")]
     public float timeLimit = 60f;
 
-    [Header("UI")]
+    [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
     public TextMeshProUGUI resultText;
 
+    [Header("Vitality Sliders")]
+    public Slider workerSlider;
+    public Slider machineSlider;
+    public Slider robotSlider;
+    public Slider palletSlider;
+
+    [Header("Minigames")]
+    public WorkerMiniGame workerMiniGame;
+    public MachineColorMiniGame machineMiniGame;
+    public RobotCalibrationMiniGame robotMiniGame;
+    public BalanceMiniGame palletMiniGame;
+
+    [Header("Production Stop")]
+    public ConveyorBelt[] conveyors;
+
+    [Header("Vitality Drain")]
+    public float workerDrain = 0.020f;
+    public float machineDrain = 0.015f;
+    public float robotDrain = 0.010f;
+    public float palletDrain = 0.025f;
+
     private int deliveredPallets = 0;
     private float timer;
+
+    private float workerHealth = 1f;
+    private float machineHealth = 1f;
+    private float robotHealth = 1f;
+    private float palletHealth = 1f;
+
     private bool gameEnded = false;
+    private bool stationBroken = false;
+
+    private const string MINIGAME_REASON = "MINIGAME";
+    private const string GAME_END_REASON = "GAME_END";
+
+    private enum Station
+    {
+        Worker,
+        Machine,
+        Robot,
+        Pallet
+    }
+
+    private Station brokenStation;
 
     private void Start()
     {
         timer = timeLimit;
 
-        UpdateUI();
+        workerHealth = 1f;
+        machineHealth = 1f;
+        robotHealth = 1f;
+        palletHealth = 1f;
 
         if (resultText != null)
-        {
             resultText.text = "";
-        }
+
+        UpdateVitalityUI();
+        UpdateGameUI();
     }
 
     private void Update()
@@ -40,11 +84,148 @@ public class GameManager : MonoBehaviour
         if (timer <= 0f)
         {
             timer = 0f;
-
-            CheckResult();
+            LoseGame();
+            return;
         }
 
-        UpdateUI();
+        if (!stationBroken)
+        {
+            DrainVitality();
+            CheckForBreakdown();
+        }
+
+        UpdateVitalityUI();
+        UpdateGameUI();
+    }
+
+    private void DrainVitality()
+    {
+        workerHealth = Mathf.Clamp01(workerHealth - workerDrain * Time.deltaTime);
+        machineHealth = Mathf.Clamp01(machineHealth - machineDrain * Time.deltaTime);
+        robotHealth = Mathf.Clamp01(robotHealth - robotDrain * Time.deltaTime);
+        palletHealth = Mathf.Clamp01(palletHealth - palletDrain * Time.deltaTime);
+    }
+
+    private void CheckForBreakdown()
+    {
+        if (workerHealth <= 0f)
+        {
+            TriggerBreakdown(Station.Worker);
+            return;
+        }
+
+        if (machineHealth <= 0f)
+        {
+            TriggerBreakdown(Station.Machine);
+            return;
+        }
+
+        if (robotHealth <= 0f)
+        {
+            TriggerBreakdown(Station.Robot);
+            return;
+        }
+
+        if (palletHealth <= 0f)
+        {
+            TriggerBreakdown(Station.Pallet);
+            return;
+        }
+    }
+
+    private void TriggerBreakdown(Station station)
+    {
+        stationBroken = true;
+        brokenStation = station;
+
+        StopProductionForMinigame();
+
+        switch (station)
+        {
+            case Station.Worker:
+                workerHealth = 0f;
+                if (workerMiniGame != null)
+                    workerMiniGame.StartMiniGame();
+                break;
+
+            case Station.Machine:
+                machineHealth = 0f;
+                if (machineMiniGame != null)
+                    machineMiniGame.StartMiniGame();
+                break;
+
+            case Station.Robot:
+                robotHealth = 0f;
+                if (robotMiniGame != null)
+                    robotMiniGame.StartMiniGame();
+                break;
+
+            case Station.Pallet:
+                palletHealth = 0f;
+                if (palletMiniGame != null)
+                    palletMiniGame.StartMiniGame();
+                break;
+        }
+
+        UpdateVitalityUI();
+    }
+
+    public void RepairCurrentStation()
+    {
+        if (gameEnded)
+            return;
+
+        switch (brokenStation)
+        {
+            case Station.Worker:
+                workerHealth = 1f;
+                break;
+
+            case Station.Machine:
+                machineHealth = 1f;
+                break;
+
+            case Station.Robot:
+                robotHealth = 1f;
+                break;
+
+            case Station.Pallet:
+                palletHealth = 1f;
+                break;
+        }
+
+        stationBroken = false;
+
+        ResumeProductionAfterMinigame();
+
+        UpdateVitalityUI();
+    }
+
+    private void StopProductionForMinigame()
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.AddStopReason(MINIGAME_REASON);
+        }
+    }
+
+    private void ResumeProductionAfterMinigame()
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.RemoveStopReason(MINIGAME_REASON);
+        }
+    }
+
+    private void StopProductionForever()
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.AddStopReason(GAME_END_REASON);
+        }
     }
 
     public void PalletDelivered()
@@ -54,73 +235,55 @@ public class GameManager : MonoBehaviour
 
         deliveredPallets++;
 
-        UpdateUI();
-
-        Debug.Log(
-            "Pallet delivered: "
-            + deliveredPallets
-            + "/"
-            + targetPallets
-        );
-
         if (deliveredPallets >= targetPallets)
         {
             WinGame();
         }
-    }
 
-    private void CheckResult()
-    {
-        if (deliveredPallets >= targetPallets)
-        {
-            WinGame();
-        }
-        else
-        {
-            LoseGame();
-        }
+        UpdateGameUI();
     }
 
     private void WinGame()
     {
         gameEnded = true;
 
-        Debug.Log("YOU WIN!");
+        StopProductionForever();
 
         if (resultText != null)
-        {
             resultText.text = "YOU WIN!";
-        }
     }
 
     private void LoseGame()
     {
         gameEnded = true;
 
-        Debug.Log("YOU LOSE!");
+        StopProductionForever();
 
         if (resultText != null)
-        {
-            resultText.text = "YOU LOSE!";
-        }
+            resultText.text = "GAME OVER!";
     }
 
-    private void UpdateUI()
+    private void UpdateVitalityUI()
+    {
+        if (workerSlider != null)
+            workerSlider.value = workerHealth;
+
+        if (machineSlider != null)
+            machineSlider.value = machineHealth;
+
+        if (robotSlider != null)
+            robotSlider.value = robotHealth;
+
+        if (palletSlider != null)
+            palletSlider.value = palletHealth;
+    }
+
+    private void UpdateGameUI()
     {
         if (timerText != null)
-        {
-            timerText.text =
-                "TIME: "
-                + Mathf.CeilToInt(timer).ToString();
-        }
+            timerText.text = Mathf.CeilToInt(timer).ToString();
 
         if (palletText != null)
-        {
-            palletText.text =
-                "PALLETS: "
-                + deliveredPallets
-                + "/"
-                + targetPallets;
-        }
+            palletText.text = deliveredPallets + " / " + targetPallets;
     }
 }

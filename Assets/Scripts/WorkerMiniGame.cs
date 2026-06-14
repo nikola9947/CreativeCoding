@@ -27,7 +27,8 @@ public class WorkerMiniGame : MonoBehaviour
         if (sliderUI != null)
             sliderUI.SetActive(false);
 
-        StartMiniGame();
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(false);
     }
 
     private void Update()
@@ -35,13 +36,24 @@ public class WorkerMiniGame : MonoBehaviour
         if (!miniGameActive)
             return;
 
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current == null)
+            return;
+
+        if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            Ray ray = miniGameCam.ScreenPointToRay(Mouse.current.position.ReadValue());
+            if (miniGameCam == null || fanObject == null)
+                return;
+
+            Ray ray = miniGameCam.ScreenPointToRay(
+                Mouse.current.position.ReadValue()
+            );
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                if (hit.collider.gameObject == fanObject || hit.collider.transform.IsChildOf(fanObject.transform))
+                if (
+                    hit.collider.gameObject == fanObject ||
+                    hit.collider.transform.IsChildOf(fanObject.transform)
+                )
                 {
                     FanClick();
                 }
@@ -60,12 +72,15 @@ public class WorkerMiniGame : MonoBehaviour
         if (recoverySlider != null)
             recoverySlider.value = 0f;
 
-        Time.timeScale = 0f;
+        
 
-        mainCamera.SetActive(false);
-        miniGameCamera.SetActive(true);
+        if (mainCamera != null)
+            mainCamera.SetActive(false);
 
-        Debug.Log("MINIGAME STARTED");
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(true);
+
+        Debug.Log("WORKER MINIGAME STARTED");
     }
 
     public void FanClick()
@@ -81,7 +96,9 @@ public class WorkerMiniGame : MonoBehaviour
         Debug.Log("Fan clicked: " + currentRecovery + "/" + clicksNeeded);
 
         if (currentRecovery >= clicksNeeded)
+        {
             FinishMiniGame();
+        }
     }
 
     private void FinishMiniGame()
@@ -91,11 +108,21 @@ public class WorkerMiniGame : MonoBehaviour
         if (sliderUI != null)
             sliderUI.SetActive(false);
 
-        Time.timeScale = 1f;
+        
 
-        mainCamera.SetActive(true);
-        miniGameCamera.SetActive(false);
+        if (mainCamera != null)
+            mainCamera.SetActive(true);
+
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(false);
 
         Debug.Log("WORKER RECOVERED");
+
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+
+        if (gameManager != null)
+        {
+            gameManager.RepairCurrentStation();
+        }
     }
 }

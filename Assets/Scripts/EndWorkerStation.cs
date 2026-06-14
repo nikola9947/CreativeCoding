@@ -31,9 +31,9 @@ public class EndWorkerStation : MonoBehaviour
     private bool isPacking = false;
     private bool waitingForNewPallet = false;
 
-    void Start()
+    private void Start()
     {
-        SpawnNewCarton();
+        currentCarton = null;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -54,6 +54,11 @@ public class EndWorkerStation : MonoBehaviour
 
         yield return new WaitForSeconds(packingDelay);
 
+        if (currentCarton == null)
+        {
+            SpawnNewCarton();
+        }
+
         currentBoxCount++;
 
         Debug.Log("Carton " + (currentCartonIndex + 1) + ": " + currentBoxCount + "/" + boxesPerCarton);
@@ -62,13 +67,13 @@ public class EndWorkerStation : MonoBehaviour
         {
             currentBoxCount = 0;
             currentCartonIndex++;
+            currentCarton = null;
 
             if (currentCartonIndex >= cartonsPerPalette)
             {
                 Debug.Log("PALLET FULL!");
 
                 waitingForNewPallet = true;
-
                 StopAllConveyors();
 
                 if (forklift != null)
@@ -79,8 +84,6 @@ public class EndWorkerStation : MonoBehaviour
                 isPacking = false;
                 yield break;
             }
-
-            SpawnNewCarton();
         }
 
         isPacking = false;
@@ -100,7 +103,7 @@ public class EndWorkerStation : MonoBehaviour
             slot
         );
 
-        Debug.Log("New empty carton created.");
+        Debug.Log("New carton created because package arrived.");
     }
 
     private void StopAllConveyors()
@@ -108,9 +111,7 @@ public class EndWorkerStation : MonoBehaviour
         foreach (ConveyorBelt conveyor in conveyors)
         {
             if (conveyor != null)
-            {
                 conveyor.AddStopReason(NO_PALLET_REASON);
-            }
         }
     }
 
@@ -119,9 +120,7 @@ public class EndWorkerStation : MonoBehaviour
         foreach (ConveyorBelt conveyor in conveyors)
         {
             if (conveyor != null)
-            {
                 conveyor.RemoveStopReason(NO_PALLET_REASON);
-            }
         }
     }
 
@@ -129,12 +128,11 @@ public class EndWorkerStation : MonoBehaviour
     {
         currentBoxCount = 0;
         currentCartonIndex = 0;
+        currentCarton = null;
         waitingForNewPallet = false;
 
         ReleaseAllConveyors();
 
-        SpawnNewCarton();
-
-        Debug.Log("NEW PALLET ARRIVED!");
+        Debug.Log("NEW PALLET ARRIVED - waiting for first product.");
     }
 }
