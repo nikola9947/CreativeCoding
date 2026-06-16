@@ -42,11 +42,13 @@ public class GameManager : MonoBehaviour
     private float robotHealth = 1f;
     private float palletHealth = 1f;
 
+    private bool gameStarted = false;
     private bool gameEnded = false;
     private bool stationBroken = false;
 
     private const string MINIGAME_REASON = "MINIGAME";
     private const string GAME_END_REASON = "GAME_END";
+    private const string INTRO_REASON = "INTRO";
 
     private enum Station
     {
@@ -70,12 +72,17 @@ public class GameManager : MonoBehaviour
         if (resultText != null)
             resultText.text = "";
 
+        StopProductionIntro();
+
         UpdateVitalityUI();
         UpdateGameUI();
     }
 
     private void Update()
     {
+        if (!gameStarted)
+            return;
+
         if (gameEnded)
             return;
 
@@ -96,6 +103,18 @@ public class GameManager : MonoBehaviour
 
         UpdateVitalityUI();
         UpdateGameUI();
+    }
+
+    public void StartGame()
+    {
+        if (gameStarted)
+            return;
+
+        gameStarted = true;
+
+        ResumeProductionIntro();
+
+        Debug.Log("GAME STARTED");
     }
 
     private void DrainVitality()
@@ -201,6 +220,24 @@ public class GameManager : MonoBehaviour
         UpdateVitalityUI();
     }
 
+    private void StopProductionIntro()
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.AddStopReason(INTRO_REASON);
+        }
+    }
+
+    private void ResumeProductionIntro()
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.RemoveStopReason(INTRO_REASON);
+        }
+    }
+
     private void StopProductionForMinigame()
     {
         foreach (ConveyorBelt conveyor in conveyors)
@@ -230,7 +267,7 @@ public class GameManager : MonoBehaviour
 
     public void PalletDelivered()
     {
-        if (gameEnded)
+        if (gameEnded || !gameStarted)
             return;
 
         deliveredPallets++;
