@@ -41,17 +41,23 @@ public class BalanceMiniGame : MonoBehaviour
         if (!miniGameActive)
             return;
 
-        float delta = Time.unscaledDeltaTime;
+        float delta = Time.deltaTime;
 
         balanceValue += driftSpeed * delta;
 
         if (Keyboard.current != null)
         {
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
+            if (Keyboard.current.aKey.isPressed ||
+                Keyboard.current.leftArrowKey.isPressed)
+            {
                 balanceValue -= moveSpeed * delta;
+            }
 
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
+            if (Keyboard.current.dKey.isPressed ||
+                Keyboard.current.rightArrowKey.isPressed)
+            {
                 balanceValue += moveSpeed * delta;
+            }
         }
 
         balanceValue = Mathf.Clamp(balanceValue, -100f, 100f);
@@ -90,18 +96,21 @@ public class BalanceMiniGame : MonoBehaviour
         if (arrowImage == null)
             return;
 
-        float normalized = Mathf.InverseLerp(-100f, 100f, balanceValue);
+        float normalized =
+            Mathf.InverseLerp(-100f, 100f, balanceValue);
 
-        float xPos = Mathf.Lerp(
-            -arrowMoveWidth / 2f,
-            arrowMoveWidth / 2f,
-            normalized
-        );
+        float xPos =
+            Mathf.Lerp(
+                -arrowMoveWidth / 2f,
+                 arrowMoveWidth / 2f,
+                 normalized
+            );
 
-        arrowImage.anchoredPosition = new Vector2(
-            xPos,
-            arrowImage.anchoredPosition.y
-        );
+        arrowImage.anchoredPosition =
+            new Vector2(
+                xPos,
+                arrowImage.anchoredPosition.y
+            );
     }
 
     public void StartMiniGame()
@@ -115,8 +124,6 @@ public class BalanceMiniGame : MonoBehaviour
             balanceSlider.value = balanceValue;
 
         UpdateArrow();
-
-        
 
         if (mainCamera != null)
             mainCamera.SetActive(false);
@@ -146,11 +153,10 @@ public class BalanceMiniGame : MonoBehaviour
         if (mainCamera != null)
             mainCamera.SetActive(true);
 
-        
-
         Debug.Log("PALLET STABILIZED");
 
-        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        GameManager gameManager =
+            FindFirstObjectByType<GameManager>();
 
         if (gameManager != null)
         {

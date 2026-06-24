@@ -11,7 +11,11 @@ public class GameManager : MonoBehaviour
     [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
-    public TextMeshProUGUI resultText;
+    public TextMeshProUGUI[] extraTimerTexts;
+
+    [Header("Result Images")]
+    public GameObject winImage;
+    public GameObject gameOverImage;
 
     [Header("Vitality Sliders")]
     public Slider workerSlider;
@@ -69,8 +73,11 @@ public class GameManager : MonoBehaviour
         robotHealth = 1f;
         palletHealth = 1f;
 
-        if (resultText != null)
-            resultText.text = "";
+        if (winImage != null)
+            winImage.SetActive(false);
+
+        if (gameOverImage != null)
+            gameOverImage.SetActive(false);
 
         StopProductionIntro();
 
@@ -111,7 +118,6 @@ public class GameManager : MonoBehaviour
             return;
 
         gameStarted = true;
-
         ResumeProductionIntro();
 
         Debug.Log("GAME STARTED");
@@ -283,21 +289,25 @@ public class GameManager : MonoBehaviour
     private void WinGame()
     {
         gameEnded = true;
-
         StopProductionForever();
 
-        if (resultText != null)
-            resultText.text = "YOU WIN!";
+        if (winImage != null)
+            winImage.SetActive(true);
+
+        if (gameOverImage != null)
+            gameOverImage.SetActive(false);
     }
 
     private void LoseGame()
     {
         gameEnded = true;
-
         StopProductionForever();
 
-        if (resultText != null)
-            resultText.text = "GAME OVER!";
+        if (gameOverImage != null)
+            gameOverImage.SetActive(true);
+
+        if (winImage != null)
+            winImage.SetActive(false);
     }
 
     private void UpdateVitalityUI()
@@ -316,11 +326,18 @@ public class GameManager : MonoBehaviour
     }
 
     private void UpdateGameUI()
-    {
-        if (timerText != null)
-            timerText.text = Mathf.CeilToInt(timer).ToString();
+{
+    string timeString = Mathf.CeilToInt(timer).ToString();
 
-        if (palletText != null)
-            palletText.text = deliveredPallets + " / " + targetPallets;
+    if (timerText != null)
+        timerText.text = timeString;
+
+    foreach (TextMeshProUGUI text in extraTimerTexts)
+    {
+        if (text != null)
+            text.text = timeString;
     }
-}
+
+    if (palletText != null)
+        palletText.text = deliveredPallets + " / " + targetPallets;
+}}

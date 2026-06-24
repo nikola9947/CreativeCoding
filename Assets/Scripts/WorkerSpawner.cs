@@ -13,6 +13,9 @@ public class WorkerSpawner : MonoBehaviour
     [Header("Worker Speed")]
     public float workInterval = 2f;
 
+    [Header("Animation")]
+    public WorkerAnimationController workerAnimation;
+
     private void Start()
     {
         StartCoroutine(WorkLoop());
@@ -38,6 +41,9 @@ public class WorkerSpawner : MonoBehaviour
     {
         if (packagePrefab == null || spawnPoint == null)
             return;
+
+        if (workerAnimation != null)
+            workerAnimation.PlayWork();
 
         Instantiate(
             packagePrefab,

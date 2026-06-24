@@ -24,6 +24,9 @@ public class EndWorkerStation : MonoBehaviour
     [Header("Forklift")]
     public ForkliftPickup forklift;
 
+    [Header("Worker Animation")]
+    public WorkerAnimationController worker2Animation;
+
     private int currentBoxCount = 0;
     private int currentCartonIndex = 0;
 
@@ -43,7 +46,11 @@ public class EndWorkerStation : MonoBehaviour
 
         if (other.CompareTag(packageTag))
         {
+            if (worker2Animation != null)
+                worker2Animation.PlayWork();
+
             Destroy(other.gameObject);
+
             StartCoroutine(PackBox());
         }
     }
@@ -61,7 +68,14 @@ public class EndWorkerStation : MonoBehaviour
 
         currentBoxCount++;
 
-        Debug.Log("Carton " + (currentCartonIndex + 1) + ": " + currentBoxCount + "/" + boxesPerCarton);
+        Debug.Log(
+            "Carton "
+            + (currentCartonIndex + 1)
+            + ": "
+            + currentBoxCount
+            + "/"
+            + boxesPerCarton
+        );
 
         if (currentBoxCount >= boxesPerCarton)
         {
@@ -77,9 +91,7 @@ public class EndWorkerStation : MonoBehaviour
                 StopAllConveyors();
 
                 if (forklift != null)
-                {
                     forklift.PickupPallet(this);
-                }
 
                 isPacking = false;
                 yield break;
