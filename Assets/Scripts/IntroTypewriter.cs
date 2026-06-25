@@ -5,123 +5,67 @@ using UnityEngine.InputSystem;
 
 public class IntroTypewriter : MonoBehaviour
 {
-    [Header("Panels")]
-    public GameObject titlePanel;
-    public GameObject introPanel;
-    public GameObject mainCanvas;
+    [Header("Menu Flow")]
+    public MenuFlowManager menuFlowManager;
 
-    [Header("Intro")]
-    public TextMeshProUGUI introText;
-    public GameObject startButton;
-
-    [Header("Game")]
-    public GameManager gameManager;
-
+    [Header("Text")]
     [TextArea(4, 10)]
     public string fullText =
         "Welcome, Operator!\n\n" +
         "Keep the factory running by maintaining the workers, machines, robot and pallet station.\n\n" +
-        "Repair breakdowns through minigames and deliver 10 pallets before time runs out!";
+        "Repair breakdowns through minigames and deliver the required pallets before time runs out!";
 
     public float typingSpeed = 0.03f;
 
-    private bool titleActive = true;
-    private bool introActive = false;
-    private bool isTyping = false;
-    private bool gameStarted = false;
+    private TextMeshProUGUI introText;
+    private bool waitingForClick = false;
 
-    private void Start()
+    private void Awake()
     {
-        if (titlePanel != null)
-            titlePanel.SetActive(true);
+        // Sucht automatisch den ersten TMP-Text im Intro-Canvas
+        introText = GetComponentInChildren<TextMeshProUGUI>(true);
 
-        if (introPanel != null)
-            introPanel.SetActive(false);
-
-        if (mainCanvas != null)
-            mainCanvas.SetActive(false);
-
-        if (startButton != null)
-            startButton.SetActive(false);
+        if (introText == null)
+            Debug.LogError("IntroTypewriter: Kein TextMeshProUGUI als Child gefunden!");
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (gameStarted)
+        StopAllCoroutines();
+
+        waitingForClick = false;
+
+        if (introText == null)
             return;
-
-        if (Mouse.current == null)
-            return;
-
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            if (titleActive)
-            {
-                ShowIntro();
-                return;
-            }
-
-            if (introActive && !isTyping)
-            {
-                StartGame();
-            }
-        }
-    }
-
-    private void ShowIntro()
-    {
-        titleActive = false;
-        introActive = true;
-
-        if (titlePanel != null)
-            titlePanel.SetActive(false);
-
-        if (introPanel != null)
-            introPanel.SetActive(true);
 
         StartCoroutine(TypeText());
     }
 
+    private void Update()
+    {
+        if (!waitingForClick)
+            return;
+
+        if (Mouse.current != null &&
+            Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            waitingForClick = false;
+
+            if (menuFlowManager != null)
+                menuFlowManager.ShowDifficulty();
+        }
+    }
+
     private IEnumerator TypeText()
     {
-        isTyping = true;
-
-        if (introText != null)
-            introText.text = "";
+        introText.text = "";
 
         foreach (char c in fullText)
         {
-            if (introText != null)
-                introText.text += c;
-
+            introText.text += c;
             yield return new WaitForSecondsRealtime(typingSpeed);
         }
 
-        isTyping = false;
-
-        if (startButton != null)
-            startButton.SetActive(true);
-    }
-
-    public void StartGame()
-    {
-        if (gameStarted)
-            return;
-
-        gameStarted = true;
-
-        Debug.Log("START GAME TRIGGERED");
-
-        if (introPanel != null)
-            introPanel.SetActive(false);
-
-        if (titlePanel != null)
-            titlePanel.SetActive(false);
-
-        if (mainCanvas != null)
-            mainCanvas.SetActive(true);
-
-        if (gameManager != null)
-            gameManager.StartGame();
+        waitingForClick = true;
     }
 }

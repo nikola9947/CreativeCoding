@@ -4,14 +4,22 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Goal")]
-    public int targetPallets = 10;
-    public float timeLimit = 60f;
+    [System.Serializable]
+    public class DifficultySettings
+    {
+        public int targetPallets = 10;
+        public float timeLimit = 60f;
+
+        public float workerDrain = 0.020f;
+        public float machineDrain = 0.015f;
+        public float robotDrain = 0.010f;
+        public float palletDrain = 0.025f;
+    }
+
 
     [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
-    public TextMeshProUGUI[] extraTimerTexts;
 
     [Header("Result Images")]
     public GameObject winImage;
@@ -23,6 +31,11 @@ public class GameManager : MonoBehaviour
     public Slider robotSlider;
     public Slider palletSlider;
 
+    [Header("Difficulty Settings")]
+    public DifficultySettings easySettings;
+    public DifficultySettings mediumSettings;
+    public DifficultySettings hardSettings;
+
     [Header("Minigames")]
     public WorkerMiniGame workerMiniGame;
     public MachineColorMiniGame machineMiniGame;
@@ -32,27 +45,28 @@ public class GameManager : MonoBehaviour
     [Header("Production Stop")]
     public ConveyorBelt[] conveyors;
 
-    [Header("Vitality Drain")]
-    public float workerDrain = 0.020f;
-    public float machineDrain = 0.015f;
-    public float robotDrain = 0.010f;
-    public float palletDrain = 0.025f;
-
-    private int deliveredPallets = 0;
+    private int targetPallets;
     private float timer;
 
-    private float workerHealth = 1f;
-    private float machineHealth = 1f;
-    private float robotHealth = 1f;
-    private float palletHealth = 1f;
+    private float workerDrain;
+    private float machineDrain;
+    private float robotDrain;
+    private float palletDrain;
+
+    private int deliveredPallets;
+
+    private float workerHealth;
+    private float machineHealth;
+    private float robotHealth;
+    private float palletHealth;
 
     private bool gameStarted = false;
     private bool gameEnded = false;
     private bool stationBroken = false;
 
+    private const string INTRO_REASON = "INTRO";
     private const string MINIGAME_REASON = "MINIGAME";
     private const string GAME_END_REASON = "GAME_END";
-    private const string INTRO_REASON = "INTRO";
 
     private enum Station
     {
@@ -64,22 +78,12 @@ public class GameManager : MonoBehaviour
 
     private Station brokenStation;
 
-    private void Start()
+    public void Start()
     {
-        timer = timeLimit;
+        ApplyDifficulty(mediumSettings);
+        ResetGameState();
 
-        workerHealth = 1f;
-        machineHealth = 1f;
-        robotHealth = 1f;
-        palletHealth = 1f;
-
-        if (winImage != null)
-            winImage.SetActive(false);
-
-        if (gameOverImage != null)
-            gameOverImage.SetActive(false);
-
-        StopProductionIntro();
+        StopProduction(INTRO_REASON);
 
         UpdateVitalityUI();
         UpdateGameUI();
@@ -87,10 +91,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (!gameStarted)
-            return;
-
-        if (gameEnded)
+        if (!gameStarted || gameEnded)
             return;
 
         timer -= Time.deltaTime;
@@ -112,13 +113,66 @@ public class GameManager : MonoBehaviour
         UpdateGameUI();
     }
 
-    public void StartGame()
+    public void ApplyEasyDifficulty()
     {
-        if (gameStarted)
+        ApplyDifficulty(easySettings);
+    }
+
+    public void ApplyMediumDifficulty()
+    {
+        ApplyDifficulty(mediumSettings);
+    }
+
+    public void ApplyHardDifficulty()
+    {
+        ApplyDifficulty(hardSettings);
+    }
+
+    public void ApplyDifficulty(DifficultySettings settings)
+    {
+        if (settings == null)
             return;
 
+        targetPallets = settings.targetPallets;
+        timer = settings.timeLimit;
+
+        workerDrain = settings.workerDrain;
+        machineDrain = settings.machineDrain;
+        robotDrain = settings.robotDrain;
+        palletDrain = settings.palletDrain;
+    }
+
+    private void ResetGameState()
+    {
+        deliveredPallets = 0;
+
+        workerHealth = 1f;
+        machineHealth = 1f;
+        robotHealth = 1f;
+        palletHealth = 1f;
+
+        gameStarted = false;
+        gameEnded = false;
+        stationBroken = false;
+
+        if (winImage != null)
+            winImage.SetActive(false);
+
+        if (gameOverImage != null)
+            gameOverImage.SetActive(false);
+    }
+
+    public void StartGame()
+    {
+        ResetGameState();
+
         gameStarted = true;
-        ResumeProductionIntro();
+
+        ResumeProduction(INTRO_REASON);
+        ResumeProduction(MINIGAME_REASON);
+
+        UpdateVitalityUI();
+        UpdateGameUI();
 
         Debug.Log("GAME STARTED");
     }
@@ -163,32 +217,40 @@ public class GameManager : MonoBehaviour
         stationBroken = true;
         brokenStation = station;
 
-        StopProductionForMinigame();
+        StopProduction(MINIGAME_REASON);
 
         switch (station)
         {
             case Station.Worker:
                 workerHealth = 0f;
+
                 if (workerMiniGame != null)
                     workerMiniGame.StartMiniGame();
+
                 break;
 
             case Station.Machine:
                 machineHealth = 0f;
+
                 if (machineMiniGame != null)
                     machineMiniGame.StartMiniGame();
+
                 break;
 
             case Station.Robot:
                 robotHealth = 0f;
+
                 if (robotMiniGame != null)
                     robotMiniGame.StartMiniGame();
+
                 break;
 
             case Station.Pallet:
                 palletHealth = 0f;
+
                 if (palletMiniGame != null)
                     palletMiniGame.StartMiniGame();
+
                 break;
         }
 
@@ -221,59 +283,14 @@ public class GameManager : MonoBehaviour
 
         stationBroken = false;
 
-        ResumeProductionAfterMinigame();
+        ResumeProduction(MINIGAME_REASON);
 
         UpdateVitalityUI();
     }
 
-    private void StopProductionIntro()
-    {
-        foreach (ConveyorBelt conveyor in conveyors)
-        {
-            if (conveyor != null)
-                conveyor.AddStopReason(INTRO_REASON);
-        }
-    }
-
-    private void ResumeProductionIntro()
-    {
-        foreach (ConveyorBelt conveyor in conveyors)
-        {
-            if (conveyor != null)
-                conveyor.RemoveStopReason(INTRO_REASON);
-        }
-    }
-
-    private void StopProductionForMinigame()
-    {
-        foreach (ConveyorBelt conveyor in conveyors)
-        {
-            if (conveyor != null)
-                conveyor.AddStopReason(MINIGAME_REASON);
-        }
-    }
-
-    private void ResumeProductionAfterMinigame()
-    {
-        foreach (ConveyorBelt conveyor in conveyors)
-        {
-            if (conveyor != null)
-                conveyor.RemoveStopReason(MINIGAME_REASON);
-        }
-    }
-
-    private void StopProductionForever()
-    {
-        foreach (ConveyorBelt conveyor in conveyors)
-        {
-            if (conveyor != null)
-                conveyor.AddStopReason(GAME_END_REASON);
-        }
-    }
-
     public void PalletDelivered()
     {
-        if (gameEnded || !gameStarted)
+        if (!gameStarted || gameEnded)
             return;
 
         deliveredPallets++;
@@ -289,25 +306,49 @@ public class GameManager : MonoBehaviour
     private void WinGame()
     {
         gameEnded = true;
-        StopProductionForever();
+
+        StopProduction(GAME_END_REASON);
 
         if (winImage != null)
             winImage.SetActive(true);
 
         if (gameOverImage != null)
             gameOverImage.SetActive(false);
+
+        Debug.Log("YOU WIN");
     }
 
     private void LoseGame()
     {
         gameEnded = true;
-        StopProductionForever();
+
+        StopProduction(GAME_END_REASON);
 
         if (gameOverImage != null)
             gameOverImage.SetActive(true);
 
         if (winImage != null)
             winImage.SetActive(false);
+
+        Debug.Log("GAME OVER");
+    }
+
+    private void StopProduction(string reason)
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.AddStopReason(reason);
+        }
+    }
+
+    private void ResumeProduction(string reason)
+    {
+        foreach (ConveyorBelt conveyor in conveyors)
+        {
+            if (conveyor != null)
+                conveyor.RemoveStopReason(reason);
+        }
     }
 
     private void UpdateVitalityUI()
@@ -326,18 +367,11 @@ public class GameManager : MonoBehaviour
     }
 
     private void UpdateGameUI()
-{
-    string timeString = Mathf.CeilToInt(timer).ToString();
-
-    if (timerText != null)
-        timerText.text = timeString;
-
-    foreach (TextMeshProUGUI text in extraTimerTexts)
     {
-        if (text != null)
-            text.text = timeString;
-    }
+        if (timerText != null)
+            timerText.text = Mathf.CeilToInt(timer).ToString();
 
-    if (palletText != null)
-        palletText.text = deliveredPallets + " / " + targetPallets;
-}}
+        if (palletText != null)
+            palletText.text = deliveredPallets + " / " + targetPallets;
+    }
+}
