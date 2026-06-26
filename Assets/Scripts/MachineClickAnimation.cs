@@ -27,6 +27,12 @@ public class MachineClickAnimation : MonoBehaviour
 
     private void OnMouseDown()
     {
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+
+        // Während eines Minispiels keine Klick-Animation zulassen
+        if (gameManager != null && gameManager.IsMiniGameRunning())
+            return;
+
         if (isPlaying)
             return;
 
@@ -43,16 +49,18 @@ public class MachineClickAnimation : MonoBehaviour
 
         // Sound starten
         if (machineAudio != null)
+        {
+            machineAudio.Stop();
             machineAudio.Play();
+        }
 
-        // Warten
         yield return new WaitForSeconds(animationDuration);
 
         // Zurück auf Idle
         if (animator != null)
             animator.Play(idleState);
 
-        // Sound stoppen, falls er noch läuft
+        // Sound stoppen
         if (machineAudio != null && machineAudio.isPlaying)
             machineAudio.Stop();
 

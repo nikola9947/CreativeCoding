@@ -16,10 +16,12 @@ public class GameManager : MonoBehaviour
         public float palletDrain = 0.025f;
     }
 
-
     [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
+
+    [Header("Extra Timer Texts")]
+    public TextMeshProUGUI[] extraTimerTexts;
 
     [Header("Result Images")]
     public GameObject winImage;
@@ -78,7 +80,7 @@ public class GameManager : MonoBehaviour
 
     private Station brokenStation;
 
-    public void Start()
+    private void Start()
     {
         ApplyDifficulty(mediumSettings);
         ResetGameState();
@@ -177,6 +179,11 @@ public class GameManager : MonoBehaviour
         Debug.Log("GAME STARTED");
     }
 
+    public bool IsMiniGameRunning()
+    {
+        return stationBroken;
+    }
+
     private void DrainVitality()
     {
         workerHealth = Mathf.Clamp01(workerHealth - workerDrain * Time.deltaTime);
@@ -223,34 +230,26 @@ public class GameManager : MonoBehaviour
         {
             case Station.Worker:
                 workerHealth = 0f;
-
                 if (workerMiniGame != null)
                     workerMiniGame.StartMiniGame();
-
                 break;
 
             case Station.Machine:
                 machineHealth = 0f;
-
                 if (machineMiniGame != null)
                     machineMiniGame.StartMiniGame();
-
                 break;
 
             case Station.Robot:
                 robotHealth = 0f;
-
                 if (robotMiniGame != null)
                     robotMiniGame.StartMiniGame();
-
                 break;
 
             case Station.Pallet:
                 palletHealth = 0f;
-
                 if (palletMiniGame != null)
                     palletMiniGame.StartMiniGame();
-
                 break;
         }
 
@@ -296,9 +295,7 @@ public class GameManager : MonoBehaviour
         deliveredPallets++;
 
         if (deliveredPallets >= targetPallets)
-        {
             WinGame();
-        }
 
         UpdateGameUI();
     }
@@ -368,8 +365,19 @@ public class GameManager : MonoBehaviour
 
     private void UpdateGameUI()
     {
+        string timeString = Mathf.CeilToInt(timer).ToString();
+
         if (timerText != null)
-            timerText.text = Mathf.CeilToInt(timer).ToString();
+            timerText.text = timeString;
+
+        if (extraTimerTexts != null)
+        {
+            foreach (TextMeshProUGUI extraTimerText in extraTimerTexts)
+            {
+                if (extraTimerText != null)
+                    extraTimerText.text = timeString;
+            }
+        }
 
         if (palletText != null)
             palletText.text = deliveredPallets + " / " + targetPallets;

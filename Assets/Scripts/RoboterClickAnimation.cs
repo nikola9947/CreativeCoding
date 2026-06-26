@@ -26,6 +26,11 @@ public class RoboterClickAnimation : MonoBehaviour
 
     private void OnMouseDown()
     {
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+
+        if (gameManager != null && gameManager.IsMiniGameRunning())
+            return;
+
         if (isPlaying)
             return;
 
@@ -36,21 +41,20 @@ public class RoboterClickAnimation : MonoBehaviour
     {
         isPlaying = true;
 
-        // Animation starten
         if (animator != null)
         {
             animator.ResetTrigger(clickTrigger);
             animator.SetTrigger(clickTrigger);
         }
 
-        // Sound starten
         if (robotAudio != null)
+        {
+            robotAudio.Stop();
             robotAudio.Play();
+        }
 
-        // Warten
         yield return new WaitForSeconds(animationDuration);
 
-        // Sound stoppen
         if (robotAudio != null && robotAudio.isPlaying)
             robotAudio.Stop();
 
