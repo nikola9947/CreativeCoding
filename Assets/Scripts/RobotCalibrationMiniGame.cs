@@ -32,6 +32,8 @@ public class RobotCalibrationMiniGame : MonoBehaviour
 
         if (miniGameCamera != null)
             miniGameCamera.SetActive(false);
+
+        //StartMiniGame();//
     }
 
     private void Update()

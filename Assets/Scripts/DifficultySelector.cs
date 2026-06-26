@@ -1,9 +1,21 @@
 using UnityEngine;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DifficultySelector : MonoBehaviour
 {
     public GameManager gameManager;
     public MenuFlowManager menuFlowManager;
+
+
+    private void Update()
+    {
+    if (Mouse.current != null &&
+        Mouse.current.leftButton.wasPressedThisFrame)
+    {
+        Debug.Log("Mouse click detected by DifficultySelector");
+    }
+    }
 
     private void Awake()
     {
