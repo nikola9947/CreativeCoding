@@ -3,9 +3,15 @@ using UnityEngine;
 
 public class RoboterClickAnimation : MonoBehaviour
 {
+    [Header("Animator")]
     public Animator animator;
+
+    [Header("Animation")]
     public string clickTrigger = "Click";
-    public float cooldown = 3f;
+    public float animationDuration = 3f;
+
+    [Header("Audio")]
+    public AudioSource robotAudio;
 
     private bool isPlaying = false;
 
@@ -13,30 +19,40 @@ public class RoboterClickAnimation : MonoBehaviour
     {
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+
+        if (robotAudio == null)
+            robotAudio = GetComponent<AudioSource>();
     }
 
     private void OnMouseDown()
     {
-        Debug.Log("ROBOT CLICKED");
-
         if (isPlaying)
             return;
 
-        StartCoroutine(PlayClickAnimation());
+        StartCoroutine(PlayAnimation());
     }
 
-    private IEnumerator PlayClickAnimation()
+    private IEnumerator PlayAnimation()
     {
         isPlaying = true;
 
+        // Animation starten
         if (animator != null)
         {
-            animator.ResetTrigger("Work");
             animator.ResetTrigger(clickTrigger);
             animator.SetTrigger(clickTrigger);
         }
 
-        yield return new WaitForSeconds(cooldown);
+        // Sound starten
+        if (robotAudio != null)
+            robotAudio.Play();
+
+        // Warten
+        yield return new WaitForSeconds(animationDuration);
+
+        // Sound stoppen
+        if (robotAudio != null && robotAudio.isPlaying)
+            robotAudio.Stop();
 
         isPlaying = false;
     }
