@@ -23,9 +23,8 @@ public class GameManager : MonoBehaviour
     [Header("Extra Timer Texts")]
     public TextMeshProUGUI[] extraTimerTexts;
 
-    [Header("Result Images")]
-    public GameObject winImage;
-    public GameObject gameOverImage;
+    [Header("Outro")]
+    public OutroManager outroManager;
 
     [Header("Vitality Sliders")]
     public Slider workerSlider;
@@ -156,12 +155,6 @@ public class GameManager : MonoBehaviour
         gameStarted = false;
         gameEnded = false;
         stationBroken = false;
-
-        if (winImage != null)
-            winImage.SetActive(false);
-
-        if (gameOverImage != null)
-            gameOverImage.SetActive(false);
     }
 
     public void StartGame()
@@ -172,6 +165,7 @@ public class GameManager : MonoBehaviour
 
         ResumeProduction(INTRO_REASON);
         ResumeProduction(MINIGAME_REASON);
+        ResumeProduction(GAME_END_REASON);
 
         UpdateVitalityUI();
         UpdateGameUI();
@@ -306,11 +300,8 @@ public class GameManager : MonoBehaviour
 
         StopProduction(GAME_END_REASON);
 
-        if (winImage != null)
-            winImage.SetActive(true);
-
-        if (gameOverImage != null)
-            gameOverImage.SetActive(false);
+        if (outroManager != null)
+            outroManager.ShowWin();
 
         Debug.Log("YOU WIN");
     }
@@ -321,11 +312,8 @@ public class GameManager : MonoBehaviour
 
         StopProduction(GAME_END_REASON);
 
-        if (gameOverImage != null)
-            gameOverImage.SetActive(true);
-
-        if (winImage != null)
-            winImage.SetActive(false);
+        if (outroManager != null)
+            outroManager.ShowGameOver();
 
         Debug.Log("GAME OVER");
     }
@@ -381,5 +369,17 @@ public class GameManager : MonoBehaviour
 
         if (palletText != null)
             palletText.text = deliveredPallets + " / " + targetPallets;
+    }
+
+    public void ResetForNewGame()
+    {
+        ResetGameState();
+
+        ResumeProduction(INTRO_REASON);
+        ResumeProduction(MINIGAME_REASON);
+        ResumeProduction(GAME_END_REASON);
+
+        UpdateVitalityUI();
+        UpdateGameUI();
     }
 }

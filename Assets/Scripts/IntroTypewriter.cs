@@ -1,20 +1,9 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using UnityEngine.InputSystem;
 
 public class IntroTypewriter : MonoBehaviour
 {
-
-        private void Update()
-    {
-    if (Mouse.current != null &&
-        Mouse.current.leftButton.wasPressedThisFrame)
-    {
-        Debug.Log("Mouse click detected by DifficultySelector");
-    }
-    }
-    
     [Header("UI")]
     public TextMeshProUGUI introText;
     public GameObject continueButton;
@@ -41,19 +30,21 @@ public class IntroTypewriter : MonoBehaviour
         if (continueButton != null)
             continueButton.SetActive(false);
 
-        if (introText != null)
-            StartCoroutine(TypeText());
+        StartCoroutine(TypeText());
     }
 
     private IEnumerator TypeText()
     {
         isTyping = true;
 
-        introText.text = "";
+        if (introText != null)
+            introText.text = "";
 
         foreach (char c in fullText)
         {
-            introText.text += c;
+            if (introText != null)
+                introText.text += c;
+
             yield return new WaitForSecondsRealtime(typingSpeed);
         }
 
