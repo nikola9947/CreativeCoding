@@ -8,6 +8,7 @@ public class MenuFlowManager : MonoBehaviour
     public GameObject introCanvas;
     public GameObject difficultyCanvas;
     public GameObject mainCanvas;
+    public GameObject outroCanvas;
 
     private bool waitingForTitleClick = true;
 
@@ -35,6 +36,7 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, false);
+        SetCanvas(outroCanvas, false);
     }
 
     private void ShowIntroCanvas()
@@ -45,6 +47,7 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, true);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, false);
+        SetCanvas(outroCanvas, false);
 
         Debug.Log("MENU: Intro shown");
     }
@@ -57,6 +60,7 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, true);
         SetCanvas(mainCanvas, false);
+        SetCanvas(outroCanvas, false);
 
         Debug.Log("MENU: Difficulty shown");
     }
@@ -69,8 +73,22 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, true);
+        SetCanvas(outroCanvas, false);
 
         Debug.Log("MENU: Main canvas shown");
+    }
+
+     public void ShowOutroCanvas()
+    {
+        waitingForTitleClick = false;
+
+        SetCanvas(titleCanvas, false);
+        SetCanvas(introCanvas, false);
+        SetCanvas(difficultyCanvas, false);
+        SetCanvas(mainCanvas, false);
+        SetCanvas(outroCanvas, true);
+
+        Debug.Log("MENU: Outro canvas shown");
     }
 
     private void SetCanvas(GameObject canvasObject, bool active)
