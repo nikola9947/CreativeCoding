@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour
     [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
-
-    [Header("Extra Timer Texts")]
     public TextMeshProUGUI[] extraTimerTexts;
 
     [Header("Outro")]
@@ -132,7 +130,10 @@ public class GameManager : MonoBehaviour
     public void ApplyDifficulty(DifficultySettings settings)
     {
         if (settings == null)
+        {
+            Debug.LogError("Difficulty Settings fehlen!");
             return;
+        }
 
         targetPallets = settings.targetPallets;
         timer = settings.timeLimit;
@@ -162,6 +163,7 @@ public class GameManager : MonoBehaviour
         ResetGameState();
 
         gameStarted = true;
+        gameEnded = false;
 
         ResumeProduction(INTRO_REASON);
         ResumeProduction(MINIGAME_REASON);
@@ -173,9 +175,28 @@ public class GameManager : MonoBehaviour
         Debug.Log("GAME STARTED");
     }
 
+    public void ResetForNewGame()
+    {
+        ResetGameState();
+
+        ResumeProduction(INTRO_REASON);
+        ResumeProduction(MINIGAME_REASON);
+        ResumeProduction(GAME_END_REASON);
+
+        UpdateVitalityUI();
+        UpdateGameUI();
+
+        Debug.Log("GAME RESET FOR NEW RUN");
+    }
+
     public bool IsMiniGameRunning()
     {
         return stationBroken;
+    }
+
+    public bool CanUseWorldInteraction()
+    {
+        return gameStarted && !gameEnded && !stationBroken;
     }
 
     private void DrainVitality()
@@ -289,7 +310,10 @@ public class GameManager : MonoBehaviour
         deliveredPallets++;
 
         if (deliveredPallets >= targetPallets)
+        {
             WinGame();
+            return;
+        }
 
         UpdateGameUI();
     }
@@ -297,25 +321,41 @@ public class GameManager : MonoBehaviour
     private void WinGame()
     {
         gameEnded = true;
+        gameStarted = false;
 
         StopProduction(GAME_END_REASON);
 
-        if (outroManager != null)
-            outroManager.ShowWin();
-
         Debug.Log("YOU WIN");
+
+        if (outroManager != null)
+        {
+            Debug.Log("CALLING OUTRO WIN");
+            outroManager.ShowWin();
+        }
+        else
+        {
+            Debug.LogError("GameManager: OutroManager fehlt im Inspector!");
+        }
     }
 
     private void LoseGame()
     {
         gameEnded = true;
+        gameStarted = false;
 
         StopProduction(GAME_END_REASON);
 
-        if (outroManager != null)
-            outroManager.ShowGameOver();
-
         Debug.Log("GAME OVER");
+
+        if (outroManager != null)
+        {
+            Debug.Log("CALLING OUTRO GAME OVER");
+            outroManager.ShowGameOver();
+        }
+        else
+        {
+            Debug.LogError("GameManager: OutroManager fehlt im Inspector!");
+        }
     }
 
     private void StopProduction(string reason)
@@ -369,17 +409,5 @@ public class GameManager : MonoBehaviour
 
         if (palletText != null)
             palletText.text = deliveredPallets + " / " + targetPallets;
-    }
-
-    public void ResetForNewGame()
-    {
-        ResetGameState();
-
-        ResumeProduction(INTRO_REASON);
-        ResumeProduction(MINIGAME_REASON);
-        ResumeProduction(GAME_END_REASON);
-
-        UpdateVitalityUI();
-        UpdateGameUI();
     }
 }

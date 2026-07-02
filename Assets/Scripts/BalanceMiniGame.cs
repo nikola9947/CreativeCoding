@@ -16,6 +16,9 @@ public class BalanceMiniGame : MonoBehaviour
     [Header("Palette")]
     public Transform pallet;
 
+    [Header("Progress")]
+    public Slider progressSlider;
+
     [Header("Settings")]
     public float moveSpeed = 60f;
     public float driftSpeed = 20f;
@@ -29,6 +32,9 @@ public class BalanceMiniGame : MonoBehaviour
 
     private void Start()
     {
+        if (progressSlider != null)
+            progressSlider.value = 0f;
+
         if (miniGamePanel != null)
             miniGamePanel.SetActive(false);
 
@@ -79,15 +85,18 @@ public class BalanceMiniGame : MonoBehaviour
         if (Mathf.Abs(balanceValue) <= successRange)
         {
             balancedTimer += delta;
-
-            if (balancedTimer >= requiredBalanceTime)
-            {
-                FinishMiniGame();
-            }
         }
         else
         {
-            balancedTimer = 0f;
+            balancedTimer = Mathf.Max(0f, balancedTimer - delta * 2f);
+        }
+
+        if (progressSlider != null)
+            progressSlider.value = balancedTimer / requiredBalanceTime;
+
+        if (balancedTimer >= requiredBalanceTime)
+        {
+            FinishMiniGame();
         }
     }
 
@@ -96,21 +105,18 @@ public class BalanceMiniGame : MonoBehaviour
         if (arrowImage == null)
             return;
 
-        float normalized =
-            Mathf.InverseLerp(-100f, 100f, balanceValue);
+        float normalized = Mathf.InverseLerp(-100f, 100f, balanceValue);
 
-        float xPos =
-            Mathf.Lerp(
-                -arrowMoveWidth / 2f,
-                 arrowMoveWidth / 2f,
-                 normalized
-            );
+        float xPos = Mathf.Lerp(
+            -arrowMoveWidth / 2f,
+            arrowMoveWidth / 2f,
+            normalized
+        );
 
-        arrowImage.anchoredPosition =
-            new Vector2(
-                xPos,
-                arrowImage.anchoredPosition.y
-            );
+        arrowImage.anchoredPosition = new Vector2(
+            xPos,
+            arrowImage.anchoredPosition.y
+        );
     }
 
     public void StartMiniGame()
@@ -122,6 +128,9 @@ public class BalanceMiniGame : MonoBehaviour
 
         if (balanceSlider != null)
             balanceSlider.value = balanceValue;
+
+        if (progressSlider != null)
+            progressSlider.value = 0f;
 
         UpdateArrow();
 
@@ -144,6 +153,9 @@ public class BalanceMiniGame : MonoBehaviour
         if (pallet != null)
             pallet.localRotation = Quaternion.identity;
 
+        if (progressSlider != null)
+            progressSlider.value = 1f;
+
         if (miniGamePanel != null)
             miniGamePanel.SetActive(false);
 
@@ -155,12 +167,9 @@ public class BalanceMiniGame : MonoBehaviour
 
         Debug.Log("PALLET STABILIZED");
 
-        GameManager gameManager =
-            FindFirstObjectByType<GameManager>();
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
 
         if (gameManager != null)
-        {
             gameManager.RepairCurrentStation();
-        }
     }
 }

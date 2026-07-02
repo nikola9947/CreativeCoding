@@ -10,9 +10,15 @@ public class WorkerClickDance : MonoBehaviour
             workerAnimation = GetComponent<WorkerAnimationController>();
     }
 
+
     private void OnMouseDown()
     {
-        if (workerAnimation != null)
-            workerAnimation.PlayDance();
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+
+        // Während eines Minispiels keine Klick-Animation zulassen
+        if (gameManager != null && gameManager.IsMiniGameRunning())
+            return;
+
+        workerAnimation.PlayDance();
     }
 }

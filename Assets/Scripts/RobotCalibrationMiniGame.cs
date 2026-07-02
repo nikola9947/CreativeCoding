@@ -14,6 +14,10 @@ public class RobotCalibrationMiniGame : MonoBehaviour
     public Slider ySlider;
     public Slider zSlider;
 
+    public Button xCalibrateButton;
+    public Button yCalibrateButton;
+    public Button zCalibrateButton;
+
     [Header("Settings")]
     public float pointerSpeed = 1.5f;
     public float targetValue = 0.5f;
@@ -33,7 +37,14 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         if (miniGameCamera != null)
             miniGameCamera.SetActive(false);
 
-        //StartMiniGame();//
+        if (xCalibrateButton != null)
+            xCalibrateButton.onClick.AddListener(CalibrateX);
+
+        if (yCalibrateButton != null)
+            yCalibrateButton.onClick.AddListener(CalibrateY);
+
+        if (zCalibrateButton != null)
+            zCalibrateButton.onClick.AddListener(CalibrateZ);
     }
 
     private void Update()
@@ -42,13 +53,13 @@ public class RobotCalibrationMiniGame : MonoBehaviour
             return;
 
         if (!xDone && xSlider != null)
-            xSlider.value = Mathf.PingPong(Time.unscaledTime * pointerSpeed, 1f);
+            xSlider.value = Mathf.PingPong(Time.time * pointerSpeed, 1f);
 
         if (!yDone && ySlider != null)
-            ySlider.value = Mathf.PingPong(Time.unscaledTime * pointerSpeed * 1.2f, 1f);
+            ySlider.value = Mathf.PingPong(Time.time * pointerSpeed * 1.2f, 1f);
 
         if (!zDone && zSlider != null)
-            zSlider.value = Mathf.PingPong(Time.unscaledTime * pointerSpeed * 1.4f, 1f);
+            zSlider.value = Mathf.PingPong(Time.time * pointerSpeed * 1.4f, 1f);
     }
 
     public void StartMiniGame()
@@ -68,7 +79,14 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         if (zSlider != null)
             zSlider.value = 0f;
 
-        
+        if (xCalibrateButton != null)
+            xCalibrateButton.interactable = true;
+
+        if (yCalibrateButton != null)
+            yCalibrateButton.interactable = true;
+
+        if (zCalibrateButton != null)
+            zCalibrateButton.interactable = true;
 
         if (mainCamera != null)
             mainCamera.SetActive(false);
@@ -82,45 +100,68 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         Debug.Log("ROBOT CALIBRATION STARTED");
     }
 
-    public void CalibrateCurrentAxis()
+    public void CalibrateX()
     {
-        if (!miniGameActive)
+        if (!miniGameActive || xDone)
             return;
 
-        if (!xDone)
+        if (IsSliderInRange(xSlider))
         {
-            TryCalibrate(ref xDone, xSlider);
-            return;
-        }
+            xDone = true;
 
-        if (!yDone)
-        {
-            TryCalibrate(ref yDone, ySlider);
-            return;
-        }
+            if (xCalibrateButton != null)
+                xCalibrateButton.interactable = false;
 
-        if (!zDone)
-        {
-            TryCalibrate(ref zDone, zSlider);
-            return;
+            CheckFinished();
         }
     }
 
-    private void TryCalibrate(ref bool axisDone, Slider slider)
+    public void CalibrateY()
     {
-        if (slider == null)
+        if (!miniGameActive || yDone)
             return;
 
-        float difference = Mathf.Abs(slider.value - targetValue);
-
-        if (difference <= tolerance)
+        if (IsSliderInRange(ySlider))
         {
-            axisDone = true;
+            yDone = true;
 
-            if (xDone && yDone && zDone)
-            {
-                FinishMiniGame();
-            }
+            if (yCalibrateButton != null)
+                yCalibrateButton.interactable = false;
+
+            CheckFinished();
+        }
+    }
+
+    public void CalibrateZ()
+    {
+        if (!miniGameActive || zDone)
+            return;
+
+        if (IsSliderInRange(zSlider))
+        {
+            zDone = true;
+
+            if (zCalibrateButton != null)
+                zCalibrateButton.interactable = false;
+
+            CheckFinished();
+        }
+    }
+
+    private bool IsSliderInRange(Slider slider)
+    {
+        if (slider == null)
+            return false;
+
+        float difference = Mathf.Abs(slider.value - targetValue);
+        return difference <= tolerance;
+    }
+
+    private void CheckFinished()
+    {
+        if (xDone && yDone && zDone)
+        {
+            FinishMiniGame();
         }
     }
 
@@ -137,15 +178,11 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         if (mainCamera != null)
             mainCamera.SetActive(true);
 
-        
-
         Debug.Log("ROBOT CALIBRATED!");
 
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 
         if (gameManager != null)
-        {
             gameManager.RepairCurrentStation();
-        }
     }
 }

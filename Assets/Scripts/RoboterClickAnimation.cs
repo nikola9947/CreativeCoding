@@ -28,7 +28,7 @@ public class RoboterClickAnimation : MonoBehaviour
     {
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 
-        if (gameManager != null && gameManager.IsMiniGameRunning())
+        if (gameManager != null && !gameManager.CanUseWorldInteraction())
             return;
 
         if (isPlaying)
