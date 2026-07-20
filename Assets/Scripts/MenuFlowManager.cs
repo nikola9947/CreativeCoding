@@ -8,7 +8,6 @@ public class MenuFlowManager : MonoBehaviour
     public GameObject introCanvas;
     public GameObject difficultyCanvas;
     public GameObject mainCanvas;
-    public GameObject outroCanvas;
 
     private bool waitingForTitleClick = true;
 
@@ -36,7 +35,8 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, false);
-        SetCanvas(outroCanvas, false);
+
+        Debug.Log("MENU: Title shown");
     }
 
     private void ShowIntroCanvas()
@@ -47,7 +47,6 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, true);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, false);
-        SetCanvas(outroCanvas, false);
 
         Debug.Log("MENU: Intro shown");
     }
@@ -60,7 +59,6 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, true);
         SetCanvas(mainCanvas, false);
-        SetCanvas(outroCanvas, false);
 
         Debug.Log("MENU: Difficulty shown");
     }
@@ -73,31 +71,14 @@ public class MenuFlowManager : MonoBehaviour
         SetCanvas(introCanvas, false);
         SetCanvas(difficultyCanvas, false);
         SetCanvas(mainCanvas, true);
-        SetCanvas(outroCanvas, false);
 
-        Debug.Log("MENU: Main canvas shown");
-    }
-
-     public void ShowOutroCanvas()
-    {
-        waitingForTitleClick = false;
-
-        SetCanvas(titleCanvas, false);
-        SetCanvas(introCanvas, false);
-        SetCanvas(difficultyCanvas, false);
-        SetCanvas(mainCanvas, false);
-        SetCanvas(outroCanvas, true);
-
-        Debug.Log("MENU: Outro canvas shown");
+        Debug.Log("MENU: Main shown");
     }
 
     private void SetCanvas(GameObject canvasObject, bool active)
     {
         if (canvasObject == null)
-        {
-            Debug.LogWarning("MenuFlowManager: A canvas reference is missing.");
             return;
-        }
 
         canvasObject.SetActive(active);
     }

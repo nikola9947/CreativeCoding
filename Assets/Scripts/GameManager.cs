@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
         public float palletDrain = 0.025f;
     }
 
+    public WorkerSpawner workerSpawner;
+    
     [Header("UI Texts")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI palletText;
@@ -40,6 +42,7 @@ public class GameManager : MonoBehaviour
     public MachineColorMiniGame machineMiniGame;
     public RobotCalibrationMiniGame robotMiniGame;
     public BalanceMiniGame palletMiniGame;
+
 
     [Header("Production Stop")]
     public ConveyorBelt[] conveyors;
@@ -160,6 +163,8 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        if (workerSpawner != null)
+        workerSpawner.ResetSpawner();
         ResetGameState();
 
         gameStarted = true;

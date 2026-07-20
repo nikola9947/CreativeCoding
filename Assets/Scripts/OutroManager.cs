@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class OutroManager : MonoBehaviour
 {
-    [Header("Outro Canvas Root")]
+    [Header("Outro")]
     public GameObject outroCanvas;
 
-    [Header("Result Images")]
+    [Header("Images")]
     public GameObject winImage;
     public GameObject gameOverImage;
 
@@ -20,7 +20,6 @@ public class OutroManager : MonoBehaviour
 
     public void ShowWin()
     {
-        Debug.Log("OUTRO: SHOW WIN");
         ShowOutro();
 
         if (winImage != null)
@@ -28,11 +27,12 @@ public class OutroManager : MonoBehaviour
 
         if (gameOverImage != null)
             gameOverImage.SetActive(false);
+
+        Debug.Log("OUTRO: WIN");
     }
 
     public void ShowGameOver()
     {
-        Debug.Log("OUTRO: SHOW GAME OVER");
         ShowOutro();
 
         if (winImage != null)
@@ -40,12 +40,12 @@ public class OutroManager : MonoBehaviour
 
         if (gameOverImage != null)
             gameOverImage.SetActive(true);
+
+        Debug.Log("OUTRO: GAME OVER");
     }
 
     public void BackToDifficulty()
     {
-        Debug.Log("OUTRO: BACK TO DIFFICULTY");
-
         HideOutro();
 
         if (gameManager != null)
@@ -59,25 +59,21 @@ public class OutroManager : MonoBehaviour
     {
         if (outroCanvas == null)
         {
-            Debug.LogError("OutroManager: Outro Canvas fehlt!");
+            Debug.LogError("Outro Canvas not assigned!");
             return;
         }
 
-        Debug.Log("Outro object: " + outroCanvas.name);
-        Debug.Log("Outro active before: " + outroCanvas.activeSelf);
-
         outroCanvas.SetActive(true);
-        outroCanvas.transform.SetAsLastSibling();
 
         Canvas canvas = outroCanvas.GetComponent<Canvas>();
 
         if (canvas != null)
         {
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.overrideSorting = true;
             canvas.sortingOrder = 9999;
         }
 
-        Debug.Log("Outro active after: " + outroCanvas.activeSelf);
+        outroCanvas.transform.SetAsLastSibling();
     }
 
     private void HideOutro()

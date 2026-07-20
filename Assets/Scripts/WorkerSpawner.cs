@@ -51,4 +51,14 @@ public class WorkerSpawner : MonoBehaviour
             spawnPoint.rotation
         );
     }
-}
+
+    public void ResetSpawner()
+    {
+        GameObject[] packages = GameObject.FindGameObjectsWithTag("Package");
+
+        foreach (GameObject package in packages)
+        {
+            Destroy(package);
+        }
+    }
+    }
