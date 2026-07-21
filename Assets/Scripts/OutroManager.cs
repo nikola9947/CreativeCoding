@@ -46,13 +46,7 @@ public class OutroManager : MonoBehaviour
 
     public void BackToDifficulty()
     {
-        HideOutro();
-
-        if (gameManager != null)
-            gameManager.ResetForNewGame();
-
-        if (menuFlowManager != null)
-            menuFlowManager.ShowDifficulty();
+        gameManager.RestartScene();
     }
 
     private void ShowOutro()

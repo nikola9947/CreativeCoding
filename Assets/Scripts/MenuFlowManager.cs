@@ -9,11 +9,19 @@ public class MenuFlowManager : MonoBehaviour
     public GameObject difficultyCanvas;
     public GameObject mainCanvas;
 
-    private bool waitingForTitleClick = true;
+    private bool waitingForTitleClick;
 
     private void Start()
     {
-        ShowTitleCanvas();
+        if (GameManager.SkipIntro)
+        {
+            GameManager.SkipIntro = false;
+            ShowDifficulty();
+        }
+        else
+        {
+            ShowTitleCanvas();
+        }
     }
 
     private void Update()
@@ -77,9 +85,7 @@ public class MenuFlowManager : MonoBehaviour
 
     private void SetCanvas(GameObject canvasObject, bool active)
     {
-        if (canvasObject == null)
-            return;
-
-        canvasObject.SetActive(active);
+        if (canvasObject != null)
+            canvasObject.SetActive(active);
     }
 }

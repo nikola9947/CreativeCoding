@@ -7,18 +7,41 @@ public class WorkerSpawner : MonoBehaviour
     public GameObject packagePrefab;
     public Transform spawnPoint;
 
-    [Header("Conveyor Check")]
+    [Header("Conveyor")]
     public ConveyorBelt firstConveyor;
 
-    [Header("Worker Speed")]
+    [Header("Settings")]
     public float workInterval = 2f;
 
     [Header("Animation")]
     public WorkerAnimationController workerAnimation;
 
+    private Coroutine workCoroutine;
+
     private void Start()
     {
-        StartCoroutine(WorkLoop());
+        StartSpawner();
+    }
+
+    public void StartSpawner()
+    {
+        if (workCoroutine != null)
+            return;
+
+        workCoroutine = StartCoroutine(WorkLoop());
+
+        Debug.Log("WorkerSpawner gestartet");
+    }
+
+    public void StopSpawner()
+    {
+        if (workCoroutine == null)
+            return;
+
+        StopCoroutine(workCoroutine);
+        workCoroutine = null;
+
+        Debug.Log("WorkerSpawner gestoppt");
     }
 
     private IEnumerator WorkLoop()
@@ -39,26 +62,23 @@ public class WorkerSpawner : MonoBehaviour
 
     private void SpawnPackage()
     {
-        if (packagePrefab == null || spawnPoint == null)
+        if (packagePrefab == null)
+        {
+            Debug.LogError("WorkerSpawner: Kein Package Prefab zugewiesen.");
             return;
+        }
+
+        if (spawnPoint == null)
+        {
+            Debug.LogError("WorkerSpawner: Kein SpawnPoint zugewiesen.");
+            return;
+        }
 
         if (workerAnimation != null)
             workerAnimation.PlayWork();
 
-        Instantiate(
-            packagePrefab,
-            spawnPoint.position,
-            spawnPoint.rotation
-        );
-    }
+        Instantiate(packagePrefab, spawnPoint.position, spawnPoint.rotation);
 
-    public void ResetSpawner()
-    {
-        GameObject[] packages = GameObject.FindGameObjectsWithTag("Package");
-
-        foreach (GameObject package in packages)
-        {
-            Destroy(package);
-        }
+        Debug.Log("Paket gespawnt");
     }
-    }
+}
