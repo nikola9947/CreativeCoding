@@ -178,6 +178,11 @@ public class GameManager : MonoBehaviour
         gameStarted = false;
         gameEnded = false;
         stationBroken = false;
+
+        workerMiniGame?.ResetMiniGame();
+        machineMiniGame?.ResetMiniGame();
+        robotMiniGame?.ResetMiniGame();
+        palletMiniGame?.ResetMiniGame();
     }
 
     public void StartGame()

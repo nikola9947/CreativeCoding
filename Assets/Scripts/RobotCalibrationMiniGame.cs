@@ -31,11 +31,7 @@ public class RobotCalibrationMiniGame : MonoBehaviour
 
     private void Start()
     {
-        if (miniGamePanel != null)
-            miniGamePanel.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
+        ResetMiniGame();
 
         if (xCalibrateButton != null)
             xCalibrateButton.onClick.AddListener(CalibrateX);
@@ -100,6 +96,42 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         Debug.Log("ROBOT CALIBRATION STARTED");
     }
 
+    public void ResetMiniGame()
+    {
+        miniGameActive = false;
+
+        xDone = false;
+        yDone = false;
+        zDone = false;
+
+        if (xSlider != null)
+            xSlider.value = 0f;
+
+        if (ySlider != null)
+            ySlider.value = 0f;
+
+        if (zSlider != null)
+            zSlider.value = 0f;
+
+        if (xCalibrateButton != null)
+            xCalibrateButton.interactable = true;
+
+        if (yCalibrateButton != null)
+            yCalibrateButton.interactable = true;
+
+        if (zCalibrateButton != null)
+            zCalibrateButton.interactable = true;
+
+        if (miniGamePanel != null)
+            miniGamePanel.SetActive(false);
+
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(false);
+
+        if (mainCamera != null)
+            mainCamera.SetActive(true);
+    }
+
     public void CalibrateX()
     {
         if (!miniGameActive || xDone)
@@ -153,8 +185,7 @@ public class RobotCalibrationMiniGame : MonoBehaviour
         if (slider == null)
             return false;
 
-        float difference = Mathf.Abs(slider.value - targetValue);
-        return difference <= tolerance;
+        return Mathf.Abs(slider.value - targetValue) <= tolerance;
     }
 
     private void CheckFinished()
@@ -167,22 +198,15 @@ public class RobotCalibrationMiniGame : MonoBehaviour
 
     private void FinishMiniGame()
     {
-        miniGameActive = false;
-
-        if (miniGamePanel != null)
-            miniGamePanel.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
-
-        if (mainCamera != null)
-            mainCamera.SetActive(true);
-
         Debug.Log("ROBOT CALIBRATED!");
+
+        ResetMiniGame();
 
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 
         if (gameManager != null)
+        {
             gameManager.RepairCurrentStation();
+        }
     }
 }

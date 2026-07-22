@@ -24,11 +24,7 @@ public class WorkerMiniGame : MonoBehaviour
 
     private void Start()
     {
-        if (sliderUI != null)
-            sliderUI.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
+        ResetMiniGame();
     }
 
     private void Update()
@@ -50,10 +46,8 @@ public class WorkerMiniGame : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                if (
-                    hit.collider.gameObject == fanObject ||
-                    hit.collider.transform.IsChildOf(fanObject.transform)
-                )
+                if (hit.collider.gameObject == fanObject ||
+                    hit.collider.transform.IsChildOf(fanObject.transform))
                 {
                     FanClick();
                 }
@@ -72,8 +66,6 @@ public class WorkerMiniGame : MonoBehaviour
         if (recoverySlider != null)
             recoverySlider.value = 0f;
 
-        
-
         if (mainCamera != null)
             mainCamera.SetActive(false);
 
@@ -81,6 +73,24 @@ public class WorkerMiniGame : MonoBehaviour
             miniGameCamera.SetActive(true);
 
         Debug.Log("WORKER MINIGAME STARTED");
+    }
+
+    public void ResetMiniGame()
+    {
+        miniGameActive = false;
+        currentRecovery = 0f;
+
+        if (recoverySlider != null)
+            recoverySlider.value = 0f;
+
+        if (sliderUI != null)
+            sliderUI.SetActive(false);
+
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(false);
+
+        if (mainCamera != null)
+            mainCamera.SetActive(true);
     }
 
     public void FanClick()
@@ -103,20 +113,9 @@ public class WorkerMiniGame : MonoBehaviour
 
     private void FinishMiniGame()
     {
-        miniGameActive = false;
-
-        if (sliderUI != null)
-            sliderUI.SetActive(false);
-
-        
-
-        if (mainCamera != null)
-            mainCamera.SetActive(true);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
-
         Debug.Log("WORKER RECOVERED");
+
+        ResetMiniGame();
 
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 

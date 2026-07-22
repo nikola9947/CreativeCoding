@@ -25,11 +25,7 @@ public class MachineColorMiniGame : MonoBehaviour
 
     private void Start()
     {
-        if (miniGamePanel != null)
-            miniGamePanel.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
+        ResetMiniGame();
 
         if (redSlider != null)
             redSlider.onValueChanged.AddListener(OnColorChanged);
@@ -62,6 +58,20 @@ public class MachineColorMiniGame : MonoBehaviour
         UpdateCurrentColor();
 
         Debug.Log("MACHINE COLOR MINIGAME STARTED");
+    }
+
+    public void ResetMiniGame()
+    {
+        miniGameActive = false;
+
+        if (miniGamePanel != null)
+            miniGamePanel.SetActive(false);
+
+        if (miniGameCamera != null)
+            miniGameCamera.SetActive(false);
+
+        if (mainCamera != null)
+            mainCamera.SetActive(true);
     }
 
     private void SetRandomStartColorFarFromTarget()
@@ -99,10 +109,8 @@ public class MachineColorMiniGame : MonoBehaviour
 
     private void UpdateCurrentColor()
     {
-        if (currentColorImage == null)
-            return;
-
-        currentColorImage.color = GetCurrentColor();
+        if (currentColorImage != null)
+            currentColorImage.color = GetCurrentColor();
     }
 
     private Color GetCurrentColor()
@@ -131,18 +139,9 @@ public class MachineColorMiniGame : MonoBehaviour
 
     private void FinishMiniGame()
     {
-        miniGameActive = false;
-
-        if (miniGamePanel != null)
-            miniGamePanel.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
-
-        if (mainCamera != null)
-            mainCamera.SetActive(true);
-
         Debug.Log("MACHINE CALIBRATED!");
+
+        ResetMiniGame();
 
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 

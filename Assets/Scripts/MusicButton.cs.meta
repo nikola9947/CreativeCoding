@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: f773cd2ee42374948a8a807a7de4cc82
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - musicOnSprite: {fileID: 21300000, guid: 84e06fa4c50cb0c4d8da4769341fb430, type: 3}
+  - musicOffSprite: {fileID: 21300000, guid: 3f5b041869f2a7248a41c1dcb1162922, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -32,14 +32,7 @@ public class BalanceMiniGame : MonoBehaviour
 
     private void Start()
     {
-        if (progressSlider != null)
-            progressSlider.value = 0f;
-
-        if (miniGamePanel != null)
-            miniGamePanel.SetActive(false);
-
-        if (miniGameCamera != null)
-            miniGameCamera.SetActive(false);
+        ResetMiniGame();
     }
 
     private void Update()
@@ -146,15 +139,23 @@ public class BalanceMiniGame : MonoBehaviour
         Debug.Log("BALANCE MINIGAME STARTED");
     }
 
-    private void FinishMiniGame()
+    public void ResetMiniGame()
     {
         miniGameActive = false;
 
-        if (pallet != null)
-            pallet.localRotation = Quaternion.identity;
+        balanceValue = 0f;
+        balancedTimer = 0f;
+
+        if (balanceSlider != null)
+            balanceSlider.value = 0f;
 
         if (progressSlider != null)
-            progressSlider.value = 1f;
+            progressSlider.value = 0f;
+
+        UpdateArrow();
+
+        if (pallet != null)
+            pallet.localRotation = Quaternion.identity;
 
         if (miniGamePanel != null)
             miniGamePanel.SetActive(false);
@@ -164,12 +165,19 @@ public class BalanceMiniGame : MonoBehaviour
 
         if (mainCamera != null)
             mainCamera.SetActive(true);
+    }
 
+    private void FinishMiniGame()
+    {
         Debug.Log("PALLET STABILIZED");
+
+        ResetMiniGame();
 
         GameManager gameManager = FindFirstObjectByType<GameManager>();
 
         if (gameManager != null)
+        {
             gameManager.RepairCurrentStation();
+        }
     }
 }
