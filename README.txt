@@ -1,4 +1,4 @@
-# Factory Balance
+# Factory Flow
 
 A factory simulation game in which players must keep a production line running by repairing broken stations through interactive minigames before time runs out.
 
